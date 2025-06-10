@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="5"> <!-- Auto-refresh la fiecare 5 secunde -->
+    <title>Smart Door - Access Panel</title>
+    <!-- Google Fonts - Open Sans și Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Un gri mai deschis pentru fundal */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px; /* Lățime maximă pentru conținut */
+            margin-top: 30px;
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-family: 'Roboto', sans-serif;
+            color: #2c3e50; /* Un albastru închis */
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .status-section {
+            margin-bottom: 30px;
+        }
+
+        .status-box {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 5px solid; /* O bordură colorată pe stânga */
+            margin-bottom: 15px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .status-box p {
+            margin: 8px 0;
+            font-size: 1.1em;
+        }
+        .status-box strong {
+            font-weight: 600;
+        }
+
+        .status-authorized {
+            background-color: #e6ffed;
+            border-left-color: #28a745; /* Verde */
+            color: #1d7b38;
+        }
+        .status-unauthorized {
+            background-color: #fff8e1;
+            border-left-color: #ffc107; /* Galben/Portocaliu */
+            color: #8c6d0b;
+        }
+        .status-unknown {
+            background-color: #ffebee;
+            border-left-color: #f44336; /* Roșu */
+            color: #b71c1c;
+        }
+        .status-no_face {
+            background-color: #f1f3f5;
+            border-left-color: #adb5bd; /* Gri */
+            color: #495057;
+        }
+        .status-waiting {
+            background-color: #e3f2fd;
+            border-left-color: #2196f3; /* Albastru */
+            color: #0d47a1;
+        }
+
+        .timestamp-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .timestamp {
+            font-size: 0.85em;
+            color: #6c757d;
+            display: block; /* Fiecare pe rândul său */
+            margin-bottom: 5px;
+        }
+
+        .controls-section {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .controls-section h2 {
+            font-family: 'Roboto', sans-serif;
+            color: #34495e; /* Un alt albastru/gri */
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            font-weight: 500;
+        }
+        .controls-section button {
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            margin: 8px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls-section button:hover {
+            opacity: 0.9;
+        }
+        .controls-section button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-open { background-color: #28a745; /* Verde */ }
+        .btn-open:hover { background-color: #218838; }
+
+        .btn-close { background-color: #dc3545; /* Roșu */ }
+        .btn-close:hover { background-color: #c82333; }
+
+        .controls-section a {
+            text-decoration: none;
+        }
+        .controls-hidden-message p {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        footer {
+            margin-top: auto; /* Împinge footer-ul în jos */
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚪 Smart Door Access Panel</h1>
+        </header>
+
+        <section class="status-section">
+            {% if status_info and status_info.status %}
+                {% if status_info.status == "authorized" %}
+                    <div class="status-box status-authorized">
+                        <p><strong>Status:</strong> ✅ Authorized Access</p>
+                        <p><strong>Person:</strong> {{ status_info.person_name }}</p>
+                    </div>
+                {% elif status_info.status == "unauthorized" %}
+                    <div class="status-box status-unauthorized">
+                        <p><strong>Status:</strong> ⚠️ Unauthorized Attempt</p>
+                        <p><strong>Person:</strong> {{ status_info.person_name }}</p>
+                    </div>
+                {% elif status_info.status == "unknown" %}
+                    <div class="status-box status-unknown">
+                        <p><strong>Status:</strong> ❓ Unknown Person Detected</p>
+                        <p><strong>Person:</strong> {{ status_info.person_name|default:"Unknown" }}</p>
+                    </div>
+                {% elif status_info.status == "no_face" %}
+                     <div class="status-box status-no_face">
+                        <p><strong>Status:</strong> 🚫 No Person Detected</p>
+                    </div>
+                {% else %}
+                     <div class="status-box status-waiting">
+                        <p><strong>Status:</strong> {{ status_info.status }}</p>
+                        <p><strong>Person:</strong> {{ status_info.person_name|default:"N/A" }}</p>
+                    </div>
+                {% endif %}
+
+                <div class="timestamp-container">
+                    {% if status_info.received_at %}
+                    <span class="timestamp">Server Update: {{ status_info.received_at }}</span>
+                    {% endif %}
+                    {% if status_info.pi_timestamp %}
+                    <span class="timestamp">Pi Timestamp: {{ status_info.pi_timestamp }}</span>
+                    {% endif %}
+                </div>
+
+            {% else %}
+                <div class="status-box status-waiting">
+                    <p>{{ status_info.message|default:"Initializing system... Waiting for status from Raspberry Pi." }}</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="controls-section">
+            <h2>Remote Door Control</h2>
+            {% if status_info.show_buttons %}
+                <div>
+                    <a href="{% url 'pi_listener:send_door_command' %}?command=deschide">
+                        <button type="button" class="btn-open">🔓 Deschide Ușa</button>
+                    </a>
+                    <a href="{% url 'pi_listener:send_door_command' %}?command=inchide">
+                        <button type="button" class="btn-close">🔒 Închide Ușa</button>
+                    </a>
+                </div>
+            {% else %}
+                <div class="controls-hidden-message">
+                    <p><em>(Controls appear when a person is detected or after a manual action)</em></p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; {{ "now"|date:"Y" }} Smart Door System. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
